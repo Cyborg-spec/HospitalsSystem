@@ -40,7 +40,7 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             var interceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
-            
+
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(interceptor);
@@ -70,7 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
         services.AddScoped<ILabOrderRepository, LabOrderRepository>();
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
-        
+
         // 5. Auth and JWT configuration
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
@@ -95,15 +95,17 @@ public static class DependencyInjection
                         Encoding.UTF8.GetBytes(jwtSettings.Secret))
                 };
             });
-        
+
         services.AddAuthorization(options =>
         {
             options.AddPolicy("RequiresAdmin", policy =>
                 policy.RequireRole(nameof(UserRole.SuperAdmin), nameof(UserRole.HospitalAdmin)));
+            options.AddPolicy("CanCreatePatient",
+                policy => policy.RequireRole(nameof(UserRole.Nurse), nameof(UserRole.Receptionist),
+                    nameof(UserRole.Doctor)));
         });
         services.AddHttpContextAccessor();
-       
+
         return services;
     }
-    
 }
