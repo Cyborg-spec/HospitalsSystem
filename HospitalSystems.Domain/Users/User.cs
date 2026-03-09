@@ -12,6 +12,8 @@ public class User : IdentityUser<Guid>
     public Guid? DepartmentId { get; private set; }
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
 
     // Navigation properties
     public Hospital? Hospital { get; private set; }

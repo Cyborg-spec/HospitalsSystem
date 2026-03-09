@@ -1,4 +1,4 @@
-namespace HospitalSystems.Infrastructure.Auth;
+namespace HospitalSystems.Domain.Common.Interfaces;
 
 public interface IUserContext
 {

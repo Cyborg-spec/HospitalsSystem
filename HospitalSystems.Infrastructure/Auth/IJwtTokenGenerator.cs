@@ -4,5 +4,6 @@ namespace HospitalSystems.Infrastructure.Auth;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(User user);
+    TokenResponse GenerateToken(User user);
+    string GenerateRefreshToken();
 }

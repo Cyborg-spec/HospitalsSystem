@@ -1,4 +1,5 @@
 using System.Text;
+using HospitalSystems.Domain.Enums;
 using HospitalSystems.Domain.Appointments;
 using HospitalSystems.Domain.Billing;
 using HospitalSystems.Domain.Common.Interfaces;
@@ -32,8 +33,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // 1. Register Interceptor as Scoped, since it depends on a Scoped service (IUserContext)
-        services.AddScoped<AuditableEntityInterceptor>();
+        // 1. Register Interceptor as Singleton to avoid EF Core internal service provider rebuilds
+        services.AddSingleton<AuditableEntityInterceptor>();
 
         // 2. Register ApplicationDbContext and attach the interceptor
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
@@ -55,7 +56,8 @@ public static class DependencyInjection
                 options.Password.RequiredLength = 8;
             })
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
         // 4. Register Repositories and Unit of Work
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
@@ -72,7 +74,7 @@ public static class DependencyInjection
         // 5. Auth and JWT configuration
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddScoped<IUserContext, UserContext>();
+        services.AddSingleton<IUserContext, UserContext>();
 
         var jwtSettings = new JwtSettings();
         configuration.Bind(JwtSettings.SectionName, jwtSettings);
@@ -94,9 +96,14 @@ public static class DependencyInjection
                 };
             });
         
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("RequiresAdmin", policy =>
+                policy.RequireRole(nameof(UserRole.SuperAdmin), nameof(UserRole.HospitalAdmin)));
+        });
         services.AddHttpContextAccessor();
        
         return services;
     }
+    
 }

@@ -15,7 +15,7 @@ public class JwtTokenGenerator:IJwtTokenGenerator
     {
         _jwtSettings = jwtOptions.Value;
     }
-    public string GenerateToken(User user)
+    public TokenResponse GenerateToken(User user)
     {
         // 1. Convert our Secret string into a cryptographic byte array key
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
@@ -40,7 +40,21 @@ public class JwtTokenGenerator:IJwtTokenGenerator
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        // 5. Serialize the token into the long string format (eyJh...) that the client will see!
-        return tokenHandler.WriteToken(token);
+        
+        var accessToken = tokenHandler.WriteToken(token);
+        var refreshToken = GenerateRefreshToken();
+        return new TokenResponse(
+            accessToken, 
+            refreshToken, 
+            tokenDescriptor.Expires.Value
+        );
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }
