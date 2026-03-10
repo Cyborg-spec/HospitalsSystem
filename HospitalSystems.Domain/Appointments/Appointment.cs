@@ -7,7 +7,8 @@ namespace HospitalSystems.Domain.Appointments;
 
 public class Appointment : AuditableEntity
 {
-    public DateTime DateTime { get; private set; }
+    public DateTime StartTime { get; private set; }
+    public DateTime EndTime { get; private set; }
     public AppointmentStatus Status { get; private set; }
     public string? Type { get; private set; }
     public string? Notes { get; private set; }
@@ -22,9 +23,13 @@ public class Appointment : AuditableEntity
 
     private Appointment() { }
 
-    public Appointment(DateTime dateTime, Guid patientId, Guid doctorId, string? type, string? notes)
+    public Appointment(DateTime startTime, DateTime endTime, Guid patientId, Guid doctorId, string? type, string? notes)
     {
-        DateTime = dateTime;
+        if (startTime >= endTime)
+            throw new ArgumentException("StartTime must be before EndTime.");
+
+        StartTime = startTime;
+        EndTime = endTime;
         Status = AppointmentStatus.Scheduled;
         PatientId = patientId;
         DoctorId = doctorId;

@@ -51,7 +51,7 @@ public class AppointmentRepository:IAppointmentRepository
     public async Task<List<Appointment>> GetByDoctorAndDateAsync(Guid doctorId, DateTime date, CancellationToken cancellationToken = default)
     {
         var appointments = await _dbContext.Appointments
-            .Where(a => a.DoctorId == doctorId && a.DateTime.Date == date.Date)
+            .Where(a => a.DoctorId == doctorId && a.StartTime.Date == date.Date)
             .ToListAsync(cancellationToken);
         return appointments;
     }
@@ -64,11 +64,12 @@ public class AppointmentRepository:IAppointmentRepository
         return appointments;
     }
 
-    public async Task<bool> HasConflictAsync(Guid doctorId, DateTime dateTime, CancellationToken cancellationToken = default)
+    public async Task<bool> HasConflictAsync(Guid doctorId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Appointments
             .AnyAsync(a => a.DoctorId == doctorId
-                        && a.DateTime == dateTime
+                        && a.StartTime < endTime
+                        && a.EndTime > startTime
                         && a.Status != AppointmentStatus.Cancelled,
                 cancellationToken);
     }

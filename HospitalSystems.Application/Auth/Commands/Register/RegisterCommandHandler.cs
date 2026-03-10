@@ -27,7 +27,6 @@ public class RegisterCommandHandler(
             throw new Exception("Error creating user");
         }
         var tokenResponse = jwtTokenGenerator.GenerateToken(user);
-        // 5. Update user with their shiny new Refresh Token
         user.RefreshToken = tokenResponse.RefreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpiryDays);
         await userManager.UpdateAsync(user);

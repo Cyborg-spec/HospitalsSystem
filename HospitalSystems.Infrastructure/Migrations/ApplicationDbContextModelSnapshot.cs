@@ -37,10 +37,6 @@ namespace HospitalSystems.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_time");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
@@ -48,6 +44,10 @@ namespace HospitalSystems.Infrastructure.Migrations
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("uuid")
                         .HasColumnName("doctor_id");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_time");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -65,6 +65,10 @@ namespace HospitalSystems.Infrastructure.Migrations
                     b.Property<Guid>("PatientId")
                         .HasColumnType("uuid")
                         .HasColumnName("patient_id");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_time");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
@@ -85,8 +89,8 @@ namespace HospitalSystems.Infrastructure.Migrations
                     b.HasIndex("PatientId")
                         .HasDatabaseName("ix_appointments_patient_id");
 
-                    b.HasIndex("DoctorId", "DateTime")
-                        .HasDatabaseName("ix_appointments_doctor_id_date_time");
+                    b.HasIndex("DoctorId", "StartTime", "EndTime")
+                        .HasDatabaseName("ix_appointments_doctor_id_start_time_end_time");
 
                     b.ToTable("Appointments", (string)null);
                 });

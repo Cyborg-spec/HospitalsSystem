@@ -11,16 +11,16 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand,TokenResponse>
 {
     private readonly UserManager<User> _userManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly JwtSettings _jwtSettings; // Add settings field
+    private readonly JwtSettings _jwtSettings;
 
     public LoginCommandHandler(
         UserManager<User> userManager,
         IJwtTokenGenerator jwtTokenGenerator,
-        IOptions<JwtSettings> jwtOptions) // Inject IOptions<JwtSettings>
+        IOptions<JwtSettings> jwtOptions) 
     {
         _userManager = userManager;
         _jwtTokenGenerator = jwtTokenGenerator;
-        _jwtSettings = jwtOptions.Value; // Extract settings value
+        _jwtSettings = jwtOptions.Value;
     }
 
     public async Task<TokenResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
