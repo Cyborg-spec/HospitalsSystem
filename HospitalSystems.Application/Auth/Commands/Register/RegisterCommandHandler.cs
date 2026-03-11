@@ -19,15 +19,15 @@ public class RegisterCommandHandler(
             throw new Exception("Email is already registered");
         }
 
-        var user = new User(request.FirstName, request.LastName, request.Email, request.Role, request.HospitalId,
+        var user = new User(request.FirstName, request.LastName, request.Email,request.HospitalId,
             request.DepartmentId);
         var result = await userManager.CreateAsync(user,request.Password);
         if (!result.Succeeded)
         {
             throw new Exception("Error creating user");
         }
-        var tokenResponse = jwtTokenGenerator.GenerateToken(user);
-        user.RefreshToken = tokenResponse.RefreshToken;
+        var tokenResponse = await jwtTokenGenerator.GenerateToken(user);
+        user.RefreshToken =  tokenResponse.RefreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpiryDays);
         await userManager.UpdateAsync(user);
         return tokenResponse;

@@ -1,7 +1,9 @@
 using HospitalSystems.Application.Users.Queries;
 using HospitalSystems.Application.Users.Queries.GetUserById;
 using HospitalSystems.Domain.Common.Interfaces;
+using HospitalSystems.Domain.Constants;
 using HospitalSystems.Domain.Enums;
+using HospitalSystems.Infrastructure.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +18,7 @@ public class UserController(ISender sender) : ControllerBase
 {
 
     [HttpGet]
-    [Authorize(Policy = "RequiresAdmin")]
+    [HasPermission(Permissions.Users.Manage)]
     [ProducesResponseType(typeof(List<UserDto>), 200)]
     public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query)
     {

@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HospitalSystems.Application.Users.Queries.GetUserById;
 
-public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto>
+public class GetUserByIdQueryHandler(UserManager<User> userManager) : IRequestHandler<GetUserByIdQuery, UserDto>
 {
-    private readonly UserManager<User> _userManager;
-
-    public GetUserByIdQueryHandler(UserManager<User> userManager)
-    {
-        _userManager = userManager;
-    }
+    private readonly UserManager<User> _userManager = userManager;
 
     public async Task<UserDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
@@ -26,7 +21,6 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
             user.FirstName,
             user.LastName,
             user.Email!,
-            user.Role,
             user.HospitalId,
             user.DepartmentId,
             user.IsActive

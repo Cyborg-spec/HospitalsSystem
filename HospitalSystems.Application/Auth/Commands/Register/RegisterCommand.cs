@@ -9,7 +9,6 @@ public record RegisterCommand(
     string LastName,
     string Email,
     string Password,
-    UserRole Role,
     Guid? HospitalId = null,
     Guid? DepartmentId = null) : IRequest<TokenResponse>;
     

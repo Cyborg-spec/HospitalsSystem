@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using HospitalSystems.Domain.Common.Interfaces;
+using HospitalSystems.Domain.Constants;
 using HospitalSystems.Domain.Enums;
 
 namespace HospitalSystems.Presentation.Filters;
@@ -19,8 +20,7 @@ public class SameUserOrAdminAuthorizationFilter(IUserContext userContext) : IAut
         }
 
         var currentUserId = userContext.UserId;
-        var isUserAdmin = context.HttpContext.User.IsInRole(nameof(UserRole.SuperAdmin)) || 
-                          context.HttpContext.User.IsInRole(nameof(UserRole.HospitalAdmin));
+        var isUserAdmin = context.HttpContext.User.HasClaim("Permission", Permissions.Users.Manage);
         
         if (currentUserId != requestedUserId && !isUserAdmin)
         {

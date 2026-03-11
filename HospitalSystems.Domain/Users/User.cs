@@ -10,7 +10,6 @@ public class User : IdentityUser<Guid>
     public string LastName { get; private set; }
     public Guid? HospitalId { get; private set; }
     public Guid? DepartmentId { get; private set; }
-    public UserRole Role { get; private set; }
     public bool IsActive { get; private set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
@@ -21,13 +20,12 @@ public class User : IdentityUser<Guid>
 
     private User() { }
 
-    public User(string firstName, string lastName, string email, UserRole role, Guid? hospitalId, Guid? departmentId)
+    public User(string firstName, string lastName, string email, Guid? hospitalId, Guid? departmentId)
     {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         UserName = email;
-        Role = role;
         HospitalId = hospitalId;
         DepartmentId = departmentId;
         IsActive = true;

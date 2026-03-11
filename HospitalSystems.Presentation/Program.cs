@@ -1,6 +1,10 @@
 using System.Text.Json.Serialization;
 using HospitalSystems.Application;
+using HospitalSystems.Domain.Users;
 using HospitalSystems.Infrastructure;
+using HospitalSystems.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +37,25 @@ builder.Services.AddOpenApiDocument(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Ensure database is created (optional, if you already applied migrations you don't strictly need this, but good for local dev)
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        await DatabaseSeeder.SeedRolesAndPermissionsAsync(roleManager, userManager);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

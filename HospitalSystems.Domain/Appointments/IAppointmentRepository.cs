@@ -4,7 +4,7 @@ namespace HospitalSystems.Domain.Appointments;
 
 public interface IAppointmentRepository : IRepository<Appointment>
 {
-    Task<List<Appointment>> GetByDoctorAndDateAsync(Guid doctorId, DateTime date, CancellationToken cancellationToken = default);
-    Task<List<Appointment>> GetByPatientIdAsync(Guid patientId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Appointment>> GetByDoctorAndDateAsync(Guid doctorId, DateTime date, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Appointment>> GetByPatientIdAsync(Guid patientId, CancellationToken cancellationToken = default);
     Task<bool> HasConflictAsync(Guid doctorId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default);
 }

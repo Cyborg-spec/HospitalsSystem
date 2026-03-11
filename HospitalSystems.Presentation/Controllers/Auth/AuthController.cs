@@ -9,13 +9,10 @@ namespace HospitalSystems.Presentation.Controllers.Auth;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public class AuthController(ISender sender) : ControllerBase
 {
-    private readonly ISender _sender;
-    public AuthController(ISender sender)
-    {
-        _sender = sender;
-    }
+    private readonly ISender _sender = sender;
+
     [HttpPost("login")]
     [ProducesResponseType(typeof(TokenResponse), 200)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)

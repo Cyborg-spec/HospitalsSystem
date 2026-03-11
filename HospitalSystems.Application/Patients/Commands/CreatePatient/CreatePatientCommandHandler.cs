@@ -4,16 +4,10 @@ using MediatR;
 
 namespace HospitalSystems.Application.Patients.Commands.CreatePatient;
 
-public class CreatePatientCommandHandler : IRequestHandler<CreatePatientCommand, Guid>
+public class CreatePatientCommandHandler(IPatientRepository patientRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreatePatientCommand, Guid>
 {
-    private readonly IPatientRepository _patientRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CreatePatientCommandHandler(IPatientRepository patientRepository, IUnitOfWork unitOfWork)
-    {
-        _patientRepository = patientRepository;
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IPatientRepository _patientRepository = patientRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Guid> Handle(CreatePatientCommand request, CancellationToken cancellationToken)
     {

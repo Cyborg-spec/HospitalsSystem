@@ -5,6 +5,6 @@ namespace HospitalSystems.Domain.Prescriptions;
 
 public interface IPrescriptionRepository : IRepository<Prescription>
 {
-    Task<List<Prescription>> GetByMedicalRecordIdAsync(Guid medicalRecordId, CancellationToken cancellationToken = default);
-    Task<List<Prescription>> GetByStatusAsync(PrescriptionStatus status, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Prescription>> GetByMedicalRecordIdAsync(Guid medicalRecordId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Prescription>> GetByStatusAsync(PrescriptionStatus status, CancellationToken cancellationToken = default);
 }

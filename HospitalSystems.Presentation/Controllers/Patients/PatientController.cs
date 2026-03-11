@@ -1,4 +1,6 @@
 using HospitalSystems.Application.Patients.Commands.CreatePatient;
+using HospitalSystems.Domain.Constants;
+using HospitalSystems.Infrastructure.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,20 +10,13 @@ namespace HospitalSystems.Presentation.Controllers.Patients;
 
 [ApiController]
 [Route("api/patients")]
-public class PatientController:ControllerBase
+public class PatientController(ISender sender) : ControllerBase
 {
-    private readonly ISender _sender;
-
-    public PatientController(ISender sender)
-    {
-        _sender = sender;
-    }
-
     [HttpPost]
-    [Authorize(Policy = "CanCreatePatient")]
+    [HasPermission(Permissions.Patients.Create)]
     public async Task<IActionResult> CreatePatient([FromBody] CreatePatientCommand request, CancellationToken cancellationToken)
     {
-        var id = await _sender.Send(request, cancellationToken);
+        var id = await sender.Send(request, cancellationToken);
         return Ok(id);
     }
 }

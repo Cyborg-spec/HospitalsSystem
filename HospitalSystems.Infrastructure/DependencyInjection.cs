@@ -3,6 +3,7 @@ using HospitalSystems.Domain.Enums;
 using HospitalSystems.Domain.Appointments;
 using HospitalSystems.Domain.Billing;
 using HospitalSystems.Domain.Common.Interfaces;
+using HospitalSystems.Domain.Constants;
 using HospitalSystems.Domain.Hospitals;
 using HospitalSystems.Domain.LabOrders;
 using HospitalSystems.Domain.MedicalRecords;
@@ -21,6 +22,7 @@ using HospitalSystems.Infrastructure.Repositories.Patients;
 using HospitalSystems.Infrastructure.Repositories.Prescriptions;
 using HospitalSystems.Infrastructure.Repositories.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -73,7 +75,7 @@ public static class DependencyInjection
 
         // 5. Auth and JWT configuration
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
-        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IUserContext, UserContext>();
 
         var jwtSettings = new JwtSettings();
@@ -96,14 +98,8 @@ public static class DependencyInjection
                 };
             });
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("RequiresAdmin", policy =>
-                policy.RequireRole(nameof(UserRole.SuperAdmin), nameof(UserRole.HospitalAdmin)));
-            options.AddPolicy("CanCreatePatient",
-                policy => policy.RequireRole(nameof(UserRole.Nurse), nameof(UserRole.Receptionist),
-                    nameof(UserRole.Doctor)));
-        });
+        services.AddAuthorization();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddHttpContextAccessor();
 
         return services;

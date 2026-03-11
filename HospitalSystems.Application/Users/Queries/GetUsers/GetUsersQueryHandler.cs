@@ -25,7 +25,6 @@ public class GetUsersQueryHandler(UserManager<User> userManager) : IRequestHandl
                 u.FirstName,
                 u.LastName,
                 u.Email!, 
-                u.Role,
                 u.HospitalId,
                 u.DepartmentId,
                 u.IsActive

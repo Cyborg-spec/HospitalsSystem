@@ -14,9 +14,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HospitalSystems.Infrastructure.Persistence;
 
-public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>,IUnitOfWork
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options),IUnitOfWork
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
     // Organization
     public DbSet<Hospital> Hospitals => Set<Hospital>();

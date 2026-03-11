@@ -7,21 +7,14 @@ using Microsoft.Extensions.Options;
 
 namespace HospitalSystems.Application.Auth.Commands.Login;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand,TokenResponse>
+public class LoginCommandHandler(
+    UserManager<User> userManager,
+    IJwtTokenGenerator jwtTokenGenerator,
+    IOptions<JwtSettings> jwtOptions) : IRequestHandler<LoginCommand,TokenResponse>
 {
-    private readonly UserManager<User> _userManager;
-    private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly JwtSettings _jwtSettings;
-
-    public LoginCommandHandler(
-        UserManager<User> userManager,
-        IJwtTokenGenerator jwtTokenGenerator,
-        IOptions<JwtSettings> jwtOptions) 
-    {
-        _userManager = userManager;
-        _jwtTokenGenerator = jwtTokenGenerator;
-        _jwtSettings = jwtOptions.Value;
-    }
+    private readonly UserManager<User> _userManager = userManager;
+    private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
+    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
 
     public async Task<TokenResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -31,7 +24,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand,TokenResponse>
             throw new Exception("Invalid email or password");
         }
 
-        var tokenResponse = _jwtTokenGenerator.GenerateToken(user);
+        var tokenResponse = await _jwtTokenGenerator.GenerateToken(user);
         user.RefreshToken = tokenResponse.RefreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
 

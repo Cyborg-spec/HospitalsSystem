@@ -4,5 +4,5 @@ namespace HospitalSystems.Domain.Hospitals;
 
 public interface IDepartmentRepository : IRepository<Department>
 {
-    Task<List<Department>> GetByHospitalIdAsync(Guid hospitalId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Department>> GetByHospitalIdAsync(Guid hospitalId, CancellationToken cancellationToken = default);
 }

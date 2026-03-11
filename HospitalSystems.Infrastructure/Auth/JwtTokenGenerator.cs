@@ -2,20 +2,25 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HospitalSystems.Domain.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HospitalSystems.Infrastructure.Auth;
 
-public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGenerator
+public class JwtTokenGenerator(
+    IOptions<JwtSettings> jwtOptions,
+    UserManager<User> userManager,
+    RoleManager<IdentityRole<Guid>> roleManager) : IJwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings = jwtOptions.Value;
+
     // We inject the strongly-typed settings using IOptions<T>!
-    public TokenResponse GenerateToken(User user)
+    public async Task<TokenResponse> GenerateToken(User user)
     {
         // 1. Convert our Secret string into a cryptographic byte array key
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-        
+
         // 2. We use HMAC SHA256 to sign the token
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         // 3. Define the minimal Claims. This tells ASP.NET *who* this is and their *Role*
@@ -23,8 +28,21 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGene
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim(ClaimTypes.Role, user.Role.ToString()) 
         };
+        var userRoles = await userManager.GetRolesAsync(user);
+        foreach (var roleName in userRoles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, roleName));
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role != null)
+            {
+                var roleClaims = await roleManager.GetClaimsAsync(role);
+                foreach (var roleClaim in roleClaims)
+                {
+                    claims.Add(roleClaim);
+                }
+            }
+        }
         // 4. Create the actual token object payload
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -36,12 +54,12 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGene
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        
+
         var accessToken = tokenHandler.WriteToken(token);
         var refreshToken = GenerateRefreshToken();
         return new TokenResponse(
-            accessToken, 
-            refreshToken, 
+            accessToken,
+            refreshToken,
             tokenDescriptor.Expires.Value
         );
     }

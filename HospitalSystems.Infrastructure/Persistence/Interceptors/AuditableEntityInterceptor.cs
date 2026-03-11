@@ -8,14 +8,8 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace HospitalSystems.Infrastructure.Persistence.Interceptors;
 
-public class AuditableEntityInterceptor : SaveChangesInterceptor
+public class AuditableEntityInterceptor(IUserContext userContext) : SaveChangesInterceptor
 {
-    private readonly IUserContext _userContext;
-
-    public AuditableEntityInterceptor(IUserContext userContext)
-    {
-        _userContext = userContext;
-    }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
@@ -39,7 +33,7 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
             .ToList();
 
         var utcNow = DateTime.UtcNow;
-        var currentUserId = _userContext.UserId; 
+        var currentUserId = userContext.UserId; 
         
         var auditLogs = new List<AuditLog>();
 

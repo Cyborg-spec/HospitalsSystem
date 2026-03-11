@@ -21,8 +21,8 @@ public class RefreshCommandHandler(
             throw new Exception("Invalid or expired refresh token");
         }
 
-        var tokenResponse = jwtTokenGenerator.GenerateToken(user);
-        user.RefreshToken = tokenResponse.RefreshToken;
+        var tokenResponse = await jwtTokenGenerator.GenerateToken(user);
+        user.RefreshToken =  tokenResponse.RefreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(jwtOptions.Value.RefreshTokenExpiryDays);
         await userManager.UpdateAsync(user);
         return tokenResponse;
