@@ -7,14 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HospitalSystems.Infrastructure.Auth;
 
-public class JwtTokenGenerator:IJwtTokenGenerator
+public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGenerator
 {
-    private readonly JwtSettings _jwtSettings;
+    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
     // We inject the strongly-typed settings using IOptions<T>!
-    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions)
-    {
-        _jwtSettings = jwtOptions.Value;
-    }
     public TokenResponse GenerateToken(User user)
     {
         // 1. Convert our Secret string into a cryptographic byte array key
