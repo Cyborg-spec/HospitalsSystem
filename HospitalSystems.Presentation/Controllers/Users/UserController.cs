@@ -1,5 +1,7 @@
 using HospitalSystems.Application.Users.Queries;
 using HospitalSystems.Application.Users.Queries.GetUserById;
+using HospitalSystems.Application.Users.Queries.GetUsers;
+using HospitalSystems.Application.Users.Queries.Shared;
 using HospitalSystems.Domain.Common.Interfaces;
 using HospitalSystems.Domain.Constants;
 using HospitalSystems.Domain.Enums;
@@ -27,7 +29,7 @@ public class UserController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize] //any user can access this but we manually restrict the returned data
+    [Authorize]
     [TypeFilter(typeof(SameUserOrAdminAuthorizationFilter))]
     [ProducesResponseType(typeof(UserDto), 200)]
     public async Task<IActionResult> GetUser([FromRoute] Guid id)
@@ -41,7 +43,7 @@ public class UserController(ISender sender) : ControllerBase
         }
         catch (Exception ex)
         {
-            return NotFound(new { Error = ex.Message }); 
+            return NotFound(new { Error = ex.Message });
         }
     }
 }

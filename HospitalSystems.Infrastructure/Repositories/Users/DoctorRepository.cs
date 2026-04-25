@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using HospitalSystems.Domain.Users;
 using HospitalSystems.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -7,22 +8,22 @@ namespace HospitalSystems.Infrastructure.Repositories.Users;
 public class DoctorRepository(ApplicationDbContext dbContext)
     : BaseRepository<Doctor>(dbContext), IDoctorRepository
 {
-    public async Task<IReadOnlyList<Doctor>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken = default)
+    public async Task<IImmutableList<Doctor>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(d => d.DepartmentId == departmentId).ToListAsync(cancellationToken);
+        return (await DbSet.Where(d => d.DepartmentId == departmentId).ToListAsync(cancellationToken)).ToImmutableList();
     }
 
-    public async Task<IReadOnlyList<Doctor>> GetByHospitalIdAsync(Guid hospitalId, CancellationToken cancellationToken = default)
+    public async Task<IImmutableList<Doctor>> GetByHospitalIdAsync(Guid hospitalId, CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        return (await DbSet
             .Include(d => d.Department)
             .Where(d => d.Department.HospitalId == hospitalId)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)).ToImmutableList();
     }
 
-    public async Task<IReadOnlyList<Doctor>> GetBySpecializationAsync(string specialization, CancellationToken cancellationToken = default)
+    public async Task<IImmutableList<Doctor>> GetBySpecializationAsync(string specialization, CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(d => d.Specialization == specialization).ToListAsync(cancellationToken);
+        return (await DbSet.Where(d => d.Specialization == specialization).ToListAsync(cancellationToken)).ToImmutableList();
     }
 
     public async Task<Doctor?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)

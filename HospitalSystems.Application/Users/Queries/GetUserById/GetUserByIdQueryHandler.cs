@@ -1,3 +1,4 @@
+using HospitalSystems.Application.Users.Queries.Shared;
 using HospitalSystems.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

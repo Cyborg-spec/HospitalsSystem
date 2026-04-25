@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using HospitalSystems.Domain.Patients;
 using HospitalSystems.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public class PatientRepository(ApplicationDbContext dbContext)
         return await DbSet.AnyAsync(p => p.NationalId == nationalId, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Patient>> SearchAsync(string searchTerm, int page, int pageSize,
+    public async Task<IImmutableList<Patient>> SearchAsync(string searchTerm, int page, int pageSize,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -28,6 +29,6 @@ public class PatientRepository(ApplicationDbContext dbContext)
 
         query = query.OrderBy(p => p.LastName);
         var result = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-        return result;
+        return result.ToImmutableList();
     }
 }

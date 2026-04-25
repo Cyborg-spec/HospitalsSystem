@@ -1,4 +1,4 @@
-using HospitalSystems.Infrastructure.Auth;
+using HospitalSystems.Application.Common.Interfaces;
 using MediatR;
 
 namespace HospitalSystems.Application.Auth.Commands.Refresh;

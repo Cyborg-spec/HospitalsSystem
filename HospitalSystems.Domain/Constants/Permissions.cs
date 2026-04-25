@@ -14,4 +14,5 @@ public static class Permissions
     {
         public const string Manage = "Permissions.Users.Manage";
     }
+
 }

@@ -1,6 +1,6 @@
 using HospitalSystems.Domain.Users;
 
-namespace HospitalSystems.Infrastructure.Auth;
+namespace HospitalSystems.Application.Common.Interfaces;
 
 public interface IJwtTokenGenerator
 {

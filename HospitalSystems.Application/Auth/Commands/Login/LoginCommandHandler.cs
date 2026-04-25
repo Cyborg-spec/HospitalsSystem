@@ -1,34 +1,36 @@
-using HospitalSystems.Application.Auth.Commands;
+using HospitalSystems.Application.Auth.Commands.Common;
 using HospitalSystems.Domain.Users;
-using HospitalSystems.Infrastructure.Auth;
+using HospitalSystems.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
 namespace HospitalSystems.Application.Auth.Commands.Login;
 
 public class LoginCommandHandler(
     UserManager<User> userManager,
-    IJwtTokenGenerator jwtTokenGenerator,
-    IOptions<JwtSettings> jwtOptions) : IRequestHandler<LoginCommand,TokenResponse>
+    IEmailService emailService) : IRequestHandler<LoginCommand, LoginResult>
 {
-    private readonly UserManager<User> _userManager = userManager;
-    private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
-    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
 
-    public async Task<TokenResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<LoginResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
         {
             throw new Exception("Invalid email or password");
         }
 
-        var tokenResponse = await _jwtTokenGenerator.GenerateToken(user);
-        user.RefreshToken = tokenResponse.RefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
+        var token = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
 
-        await _userManager.UpdateAsync(user);
-        return tokenResponse;
+        await emailService.SendAsync(
+            user.Email!,
+            "Your Hospital Systems Login Code",
+            $"Your verification code is: {token}\n\nThis code expires in 10 minutes."
+        );
+
+        return new LoginResult(
+            RequiresTwoFactor: true,
+            UserId: user.Id,
+            AccessToken: null,
+            RefreshToken: null);
     }
 }

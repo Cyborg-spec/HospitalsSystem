@@ -1,7 +1,7 @@
-using HospitalSystems.Domain.Users;
+using HospitalSystems.Application.Users.Queries.Shared;
 using MediatR;
 
-namespace HospitalSystems.Application.Users.Queries;
+namespace HospitalSystems.Application.Users.Queries.GetUsers;
 
 public record GetUsersQuery(
     Guid? HospitalId = null,

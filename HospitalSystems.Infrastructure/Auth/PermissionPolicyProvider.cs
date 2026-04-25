@@ -9,13 +9,14 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
     {
         var policy = await base.GetPolicyAsync(policyName);
         if (policy != null) return policy;
+
         if (policyName.StartsWith("Permissions", StringComparison.OrdinalIgnoreCase))
         {
-            // Dynamically build a policy requiring that specific claim!
             return new AuthorizationPolicyBuilder()
-                .RequireClaim("Permission", policyName)
+                .AddRequirements(new PermissionRequirement(policyName))
                 .Build();
         }
+
         return null;
     }
 }

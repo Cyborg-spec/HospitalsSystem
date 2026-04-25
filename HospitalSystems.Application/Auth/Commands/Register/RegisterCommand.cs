@@ -1,5 +1,5 @@
 using HospitalSystems.Domain.Enums;
-using HospitalSystems.Infrastructure.Auth;
+using HospitalSystems.Application.Common.Interfaces;
 using MediatR;
 
 namespace HospitalSystems.Application.Auth.Commands.Register;
@@ -9,6 +9,6 @@ public record RegisterCommand(
     string LastName,
     string Email,
     string Password,
+    string Role,
     Guid? HospitalId = null,
-    Guid? DepartmentId = null) : IRequest<TokenResponse>;
-    
+    Guid? DepartmentId = null) : IRequest<bool>;

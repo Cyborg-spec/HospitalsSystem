@@ -1,5 +1,6 @@
 using HospitalSystems.Domain.Users;
-using HospitalSystems.Infrastructure.Auth;
+using HospitalSystems.Application.Common.Interfaces;
+using HospitalSystems.Application.Common.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -2,6 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HospitalSystems.Domain.Users;
+using HospitalSystems.Application.Common.Interfaces;
+using HospitalSystems.Application.Common.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -29,20 +31,7 @@ public class JwtTokenGenerator(
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
         };
-        var userRoles = await userManager.GetRolesAsync(user);
-        foreach (var roleName in userRoles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, roleName));
-            var role = await roleManager.FindByNameAsync(roleName);
-            if (role != null)
-            {
-                var roleClaims = await roleManager.GetClaimsAsync(role);
-                foreach (var roleClaim in roleClaims)
-                {
-                    claims.Add(roleClaim);
-                }
-            }
-        }
+
         // 4. Create the actual token object payload
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -52,6 +41,7 @@ public class JwtTokenGenerator(
             Audience = _jwtSettings.Audience,
             SigningCredentials = credentials
         };
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
@@ -59,8 +49,7 @@ public class JwtTokenGenerator(
         var refreshToken = GenerateRefreshToken();
         return new TokenResponse(
             accessToken,
-            refreshToken,
-            tokenDescriptor.Expires.Value
+            refreshToken
         );
     }
 
@@ -71,4 +60,5 @@ public class JwtTokenGenerator(
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
     }
+
 }

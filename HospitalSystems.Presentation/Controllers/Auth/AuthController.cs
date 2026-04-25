@@ -1,6 +1,8 @@
 using HospitalSystems.Application.Auth.Commands.Login;
 using HospitalSystems.Application.Auth.Commands.Refresh;
 using HospitalSystems.Application.Auth.Commands.Register;
+using HospitalSystems.Application.Auth.Commands.Verify;
+using HospitalSystems.Application.Common.Interfaces;
 using HospitalSystems.Infrastructure.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -42,17 +44,20 @@ public class AuthController(ISender sender) : ControllerBase
         }
     }
     [HttpPost("register")]
-    [ProducesResponseType(typeof(TokenResponse), 200)]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        try
+        var success = await _sender.Send(command);
+        if (success)
         {
-            var tokenResponse = await _sender.Send(command);
-            return Ok(tokenResponse);
+            return Ok(new { Message = "Registration successful. Please log in to complete 2FA." });
         }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        return BadRequest();
+    }
+
+    [HttpPost("verify-2fa")]
+    public async Task<IActionResult> VerifyTwoFactor([FromBody] VerifyTwoFactorCommand command)
+    {
+        var result = await _sender.Send(command);
+        return Ok(result);
     }
 }

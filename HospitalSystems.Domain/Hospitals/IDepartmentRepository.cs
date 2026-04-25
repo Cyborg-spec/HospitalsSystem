@@ -1,8 +1,9 @@
+using System.Collections.Immutable;
 using HospitalSystems.Domain.Common.Interfaces;
 
 namespace HospitalSystems.Domain.Hospitals;
 
 public interface IDepartmentRepository : IRepository<Department>
 {
-    Task<IReadOnlyList<Department>> GetByHospitalIdAsync(Guid hospitalId, CancellationToken cancellationToken = default);
+    Task<IImmutableList<Department>> GetByHospitalIdAsync(Guid hospitalId, CancellationToken cancellationToken = default);
 }

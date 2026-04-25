@@ -1,6 +1,4 @@
-using HospitalSystems.Domain.Enums;
-
-namespace HospitalSystems.Application.Users.Queries;
+namespace HospitalSystems.Application.Users.Queries.Shared;
 
 public record UserDto(
     Guid Id,

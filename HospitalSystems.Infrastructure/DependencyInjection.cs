@@ -11,6 +11,8 @@ using HospitalSystems.Domain.Patients;
 using HospitalSystems.Domain.Prescriptions;
 using HospitalSystems.Domain.Users;
 using HospitalSystems.Infrastructure.Auth;
+using HospitalSystems.Application.Common.Interfaces;
+using HospitalSystems.Application.Common.Settings;
 using HospitalSystems.Infrastructure.Persistence;
 using HospitalSystems.Infrastructure.Persistence.Interceptors;
 using HospitalSystems.Infrastructure.Repositories.Appointments;
@@ -21,6 +23,8 @@ using HospitalSystems.Infrastructure.Repositories.MedicalRecords;
 using HospitalSystems.Infrastructure.Repositories.Patients;
 using HospitalSystems.Infrastructure.Repositories.Prescriptions;
 using HospitalSystems.Infrastructure.Repositories.Users;
+using HospitalSystems.Infrastructure.Services;
+using HospitalSystems.Infrastructure.Services.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -56,6 +60,9 @@ public static class DependencyInjection
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequiredLength = 8;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -74,9 +81,12 @@ public static class DependencyInjection
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 
         // 5. Auth and JWT configuration
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IRoleService, RoleService>();
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddSingleton<IUserContext, UserContext>();
+
 
         var jwtSettings = new JwtSettings();
         configuration.Bind(JwtSettings.SectionName, jwtSettings);
@@ -101,6 +111,10 @@ public static class DependencyInjection
         services.AddAuthorization();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddHttpContextAccessor();
+        services.AddMemoryCache();
+        services.AddScoped<IPermissionService, PermissionService>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
         return services;
     }

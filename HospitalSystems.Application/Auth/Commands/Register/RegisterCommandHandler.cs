@@ -1,17 +1,13 @@
 using HospitalSystems.Domain.Users;
-using HospitalSystems.Infrastructure.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
 namespace HospitalSystems.Application.Auth.Commands.Register;
 
 public class RegisterCommandHandler(
-    UserManager<User> userManager,
-    IJwtTokenGenerator jwtTokenGenerator,
-    IOptions<JwtSettings> jwtSettings) : IRequestHandler<RegisterCommand, TokenResponse>
+    UserManager<User> userManager,RoleManager<IdentityRole<Guid>>roleManager) : IRequestHandler<RegisterCommand, bool>
 {
-    public async Task<TokenResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var existingUser = await userManager.FindByEmailAsync(request.Email);
         if (existingUser != null)
@@ -19,17 +15,30 @@ public class RegisterCommandHandler(
             throw new Exception("Email is already registered");
         }
 
-        var user = new User(request.FirstName, request.LastName, request.Email,request.HospitalId,
-            request.DepartmentId);
-        var result = await userManager.CreateAsync(user,request.Password);
+        var user = new User(
+            request.FirstName,
+            request.LastName,
+            request.Email,
+            request.HospitalId,
+            request.DepartmentId)
+        {
+            TwoFactorEnabled = true,
+            EmailConfirmed = true // Crucial bit to ensure TOTP works easily
+        };
+        var roleExists = await roleManager.RoleExistsAsync(request.Role);
+        if (!roleExists)
+        {
+            throw new Exception($"Role {request.Role} not found");
+        }
+
+        var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            throw new Exception("Error creating user");
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Error creating user: {errors}");
         }
-        var tokenResponse = await jwtTokenGenerator.GenerateToken(user);
-        user.RefreshToken =  tokenResponse.RefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpiryDays);
-        await userManager.UpdateAsync(user);
-        return tokenResponse;
+
+        await userManager.AddToRoleAsync(user, request.Role);
+        return true;
     }
 }

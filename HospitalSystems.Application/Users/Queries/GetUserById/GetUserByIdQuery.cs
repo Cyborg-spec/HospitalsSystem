@@ -1,3 +1,4 @@
+using HospitalSystems.Application.Users.Queries.Shared;
 using MediatR;
 
 namespace HospitalSystems.Application.Users.Queries.GetUserById;

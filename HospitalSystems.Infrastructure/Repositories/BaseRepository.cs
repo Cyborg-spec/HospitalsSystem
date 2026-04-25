@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Linq.Expressions;
 using HospitalSystems.Domain.Common;
 using HospitalSystems.Domain.Common.Interfaces;
@@ -17,15 +18,15 @@ public abstract class BaseRepository<T>(ApplicationDbContext dbContext) : IRepos
         return await DbSet.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
-    public virtual async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<IImmutableList<T>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await DbSet.ToListAsync(cancellationToken);
+        return (await DbSet.ToListAsync(cancellationToken)).ToImmutableList();
     }
 
-    public virtual async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate,
+    public virtual async Task<IImmutableList<T>> FindAsync(Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(predicate).ToListAsync(cancellationToken);
+        return (await DbSet.Where(predicate).ToListAsync(cancellationToken)).ToImmutableList();
     }
 
     public virtual async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)

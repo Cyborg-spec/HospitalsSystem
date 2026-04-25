@@ -6,7 +6,14 @@ using HospitalSystems.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using Serilog;
+using HospitalSystems.Presentation.Middlewares;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -18,6 +25,14 @@ builder.Services.AddControllers()
 // Register your entire Infrastructure layer
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
+
+// Presentation Level Services
+builder.Services.AddSingleton<HospitalSystems.Domain.Common.Interfaces.IUserContext, HospitalSystems.Presentation.Services.UserContext>();
+
+// Add Exception Handlers (Order matters! Specific handlers first, Global last)
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
@@ -56,6 +71,11 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
+
+// Use Serilog Request Logging
+app.UseSerilogRequestLogging();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

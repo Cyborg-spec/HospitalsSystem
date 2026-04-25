@@ -1,9 +1,10 @@
+using HospitalSystems.Application.Users.Queries.Shared;
 using HospitalSystems.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace HospitalSystems.Application.Users.Queries;
+namespace HospitalSystems.Application.Users.Queries.GetUsers;
 
 public class GetUsersQueryHandler(UserManager<User> userManager) : IRequestHandler<GetUsersQuery, List<UserDto>>
 {
@@ -24,7 +25,7 @@ public class GetUsersQueryHandler(UserManager<User> userManager) : IRequestHandl
                 u.Id,
                 u.FirstName,
                 u.LastName,
-                u.Email!, 
+                u.Email!,
                 u.HospitalId,
                 u.DepartmentId,
                 u.IsActive
